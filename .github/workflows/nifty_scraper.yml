@@ -2,7 +2,7 @@ name: Nifty Chain Scraper
 
 on:
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "*/5 * * * *"   # every 5 minutes
   workflow_dispatch:
 
 permissions:
@@ -21,17 +21,17 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: "3.10"
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install pyppeteer pytz lxml-html-clean
+          pip install playwright pytz
+          python -m playwright install --with-deps chromium
 
       - name: Run scraper
         run: python download_nifty.py
 
-      - name: Commit and push changes
+      - name: Commit and push results
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -45,7 +45,7 @@ jobs:
 
           git add nifty_chain/*
           if ! git diff --cached --quiet; then
-            git commit -m "Auto update: Nifty chain Single HTML [skip ci]"
+            git commit -m "Auto update: Nifty chain snapshot [skip ci]"
             git push origin main
           else
             echo "No changes to commit."
