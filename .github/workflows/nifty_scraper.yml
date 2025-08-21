@@ -1,0 +1,33 @@
+name: Nifty Chain Scraper
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"   # Run every 5 minutes
+  workflow_dispatch:        # Manual trigger option
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          pip install requests pytz
+
+      - name: Run scraper
+        run: python download_nifty.py
+
+      - name: Commit and push results
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add nifty_chain/*
+          git commit -m "Auto update: Nifty chain HTML [skip ci]" || echo "No changes to commit"
+          git push
