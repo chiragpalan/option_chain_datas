@@ -24,6 +24,7 @@ jobs:
 
       - name: Install dependencies
         run: pip install requests pytz playwright
+             playwright install
 
       - name: Run scraper
         run: python download_nifty.py
