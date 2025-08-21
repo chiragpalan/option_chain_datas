@@ -6,11 +6,12 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: write  # Required to push changes
 
 jobs:
   scrape:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository with full history
         uses: actions/checkout@v4
@@ -26,6 +27,7 @@ jobs:
         run: |
           pip install requests pytz playwright
           playwright install
+
       - name: Run scraper
         run: python download_nifty.py
 
