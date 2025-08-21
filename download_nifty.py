@@ -1,33 +1,36 @@
 import os
-import asyncio
 from datetime import datetime
 import pytz
-from pyppeteer import launch
+from playwright.sync_api import sync_playwright
 
-async def save_page_as_single_file():
-    url = "https://groww.in/options/nifty"
+# URL
+URL = "https://groww.in/options/nifty"
 
-    # IST timestamp
-    ist = pytz.timezone("Asia/Kolkata")
-    timestamp = datetime.now(ist).strftime("%d-%m-%Y-%H-%M")
+# Make folder
+os.makedirs("nifty_chain", exist_ok=True)
 
-    # Output path
-    output_file = os.path.join("nifty_chain", f"{timestamp}_nifty50.html")
-    os.makedirs("nifty_chain", exist_ok=True)
+# Get IST timestamp
+ist = pytz.timezone("Asia/Kolkata")
+timestamp = datetime.now(ist).strftime("%d-%m-%Y-%H-%M")
+file_path = f"nifty_chain/{timestamp}_nifty50.mhtml"
 
-    browser = await launch(headless=True, args=["--no-sandbox"])
-    page = await browser.newPage()
-    await page.goto(url, {"waitUntil": "networkidle2"})
+with sync_playwright() as p:
+    browser = p.chromium.launch(headless=True)
+    page = browser.new_page()
 
-    # Get full rendered HTML (including dynamic content)
-    content = await page.content()
+    # Go to the page
+    page.goto(URL, wait_until="networkidle")
 
-    with open(output_file, "w", encoding="utf-8") as f:
-        f.write(content)
+    # Get Chrome DevTools Protocol session
+    client = page.context.new_cdp_session(page)
 
-    print(f"✅ Saved single HTML file at {output_file}")
+    # Capture MHTML (full single file webpage)
+    result = client.send("Page.captureSnapshot", {"format": "mhtml"})
 
-    await browser.close()
+    # Save to .mhtml file
+    with open(file_path, "w", encoding="utf-8") as f:
+        f.write(result["data"])
 
-if __name__ == "__main__":
-    asyncio.get_event_loop().run_until_complete(save_page_as_single_file())
+    browser.close()
+
+print(f"✅ Saved full webpage snapshot: {file_path}")
