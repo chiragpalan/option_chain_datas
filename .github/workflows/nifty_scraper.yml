@@ -30,7 +30,7 @@ jobs:
           git config user.name "GitHub Action"
           git add nifty_chain/*
           git commit -m "Auto update: Nifty chain HTML [skip ci]" || echo "No changes to commit"
-          git pull --rebase origin main   # 👈 update local branch before push
-          git push origin main
+          #git pull --rebase origin main   # 👈 update local branch before push
+          git push origin main --force
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
