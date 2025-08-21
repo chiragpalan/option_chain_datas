@@ -16,8 +16,8 @@ filepath = os.path.join("nifty_chain", filename)
 session = HTMLSession()
 r = session.get("https://groww.in/options/nifty")
 
-# Render JS (headless browser inside requests-html)
-r.html.render(timeout=60, sleep=3)   # sleep helps JS finish loading
+# Render JS
+r.html.render(timeout=60, sleep=3)
 
 with open(filepath, "w", encoding="utf-8") as f:
     f.write(r.html.html)
