@@ -1,25 +1,33 @@
-from requests_html import HTMLSession
+import os
+import asyncio
 from datetime import datetime
 import pytz
-import os
+from pyppeteer import launch
 
-# Create folder if not exists
-os.makedirs("nifty_chain", exist_ok=True)
+async def save_page_as_single_file():
+    url = "https://groww.in/options/nifty"
 
-# Get IST time
-ist = pytz.timezone("Asia/Kolkata")
-now = datetime.now(ist)
-filename = now.strftime("%d-%m-%Y-%H-%M_nifty50.html")
-filepath = os.path.join("nifty_chain", filename)
+    # IST timestamp
+    ist = pytz.timezone("Asia/Kolkata")
+    timestamp = datetime.now(ist).strftime("%d-%m-%Y-%H-%M")
 
-# Fetch and render page
-session = HTMLSession()
-r = session.get("https://groww.in/options/nifty")
+    # Output path
+    output_file = os.path.join("nifty_chain", f"{timestamp}_nifty50.html")
+    os.makedirs("nifty_chain", exist_ok=True)
 
-# Render JS
-r.html.render(timeout=60, sleep=3)
+    browser = await launch(headless=True, args=["--no-sandbox"])
+    page = await browser.newPage()
+    await page.goto(url, {"waitUntil": "networkidle2"})
 
-with open(filepath, "w", encoding="utf-8") as f:
-    f.write(r.html.html)
+    # Get full rendered HTML (including dynamic content)
+    content = await page.content()
 
-print(f"✅ Saved {filepath}")
+    with open(output_file, "w", encoding="utf-8") as f:
+        f.write(content)
+
+    print(f"✅ Saved single HTML file at {output_file}")
+
+    await browser.close()
+
+if __name__ == "__main__":
+    asyncio.get_event_loop().run_until_complete(save_page_as_single_file())
