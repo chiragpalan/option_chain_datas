@@ -26,17 +26,15 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install requests pytz
-          pip install playwright
-          python -m playwright install --with-deps
+          pip install requests pytz playwright
+          # ✅ Install only Chromium with OS dependencies
+          playwright install --with-deps chromium
 
       - name: Verify Playwright installation
         run: python -c "from playwright.sync_api import sync_playwright; print('✅ Playwright is installed')"
 
       - name: Run scraper
-        run: |
-          echo "Running scraper..."
-          python download_nifty.py
+        run: python download_nifty.py
 
       - name: Commit and push changes
         env:
