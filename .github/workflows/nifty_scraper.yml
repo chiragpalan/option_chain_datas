@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write  # Required for pushing changes
+  contents: write
 
 jobs:
   scrape:
@@ -36,14 +36,16 @@ jobs:
           git config --global user.name "GitHub Action"
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
-          # Ensure we're on the correct branch
+          # Make sure we're on the correct branch
           git checkout main
+
+          # Pull latest changes to avoid push rejection
+          git pull origin main --rebase
 
           # Stage and commit changes if any
           git add nifty_chain/*
           if ! git diff --cached --quiet; then
             git commit -m "Auto update: Nifty chain HTML [skip ci]"
-            git pull --rebase origin main
             git push origin main
           else
             echo "No changes to commit."
